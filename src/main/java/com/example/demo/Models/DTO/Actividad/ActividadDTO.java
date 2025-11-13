@@ -24,9 +24,13 @@ public class ActividadDTO {
 
     private LocalDate fecha;
 
-    private LocalTime H_inicio;
+    @NotBlank(message = "La hora inicio no puede ser nulo")
+    @Size(max = 10, message = "La hora inicio solo puede tener como maximo 10 caracteres")
+    private String H_inicio;
 
-    private LocalTime H_Fin;
+    @NotBlank(message = "La hora fin no puede ser nulo")
+    @Size(max = 10, message = "La hora fin solo puede tener como maximo 10 caracteres")
+    private String H_Fin;
 
     @NotBlank(message = "La region no puede ser nulo")
     @Size(max = 100, message = "La region solo puede tener como maximo 100 caracteres")

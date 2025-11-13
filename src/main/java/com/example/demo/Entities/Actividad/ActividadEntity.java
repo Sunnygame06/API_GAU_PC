@@ -26,10 +26,10 @@ public class ActividadEntity {
     private LocalDate fecha;
 
     @Column(name = "HORA_INICIO")
-    private LocalTime H_inicio;
+    private String H_inicio;
 
     @Column(name = "HORA_FIN")
-    private LocalTime H_Fin;
+    private String H_Fin;
 
     @Column(name = "REGION")
     private String region;

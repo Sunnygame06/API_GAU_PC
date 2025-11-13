@@ -72,7 +72,7 @@ public class ActividadService {
         existente.setTarea(json.getTarea());
         existente.setRespaldo(json.getRespaldo());
         existente.setId_Usuario(json.getId_Usuario());
-
+        existente.setDistrito(json.getDistrito());
         ActividadEntity actualizado = repo.save(existente);
         return convertirADTO(actualizado);
     }
@@ -110,6 +110,7 @@ public class ActividadService {
         dto.setTarea(objEntity.getTarea());
         dto.setRespaldo(objEntity.getRespaldo());
         dto.setId_Usuario(objEntity.getId_Usuario());
+        dto.setDistrito(objEntity.getDistrito());
         return dto;
     }
 
@@ -131,6 +132,7 @@ public class ActividadService {
         entity.setTarea(json.getTarea());
         entity.setRespaldo(json.getRespaldo());
         entity.setId_Usuario(json.getId_Usuario());
+        entity.setDistrito(json.getDistrito());
         return entity;
     }
 }
