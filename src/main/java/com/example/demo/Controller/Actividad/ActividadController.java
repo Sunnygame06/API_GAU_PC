@@ -3,6 +3,7 @@ package com.example.demo.Controller.Actividad;
 import com.example.demo.Exceptions.DatoDuplicado.ExceptionDatoDuplicado;
 import com.example.demo.Exceptions.DatoNoEncontrado.ExceptionDatoNoEncontrado;
 import com.example.demo.Models.DTO.Actividad.ActividadDTO;
+import com.example.demo.Models.DTO.Usuario.UsuarioDTO;
 import com.example.demo.Service.Actividad.ActividadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/apiActividad")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class ActividadController {
 
     @Autowired
@@ -46,27 +47,21 @@ public class ActividadController {
     }
 
     @PostMapping("/newActividad")
-    private ResponseEntity<Map<String, Object>> insert(@Valid @RequestBody ActividadDTO json, HttpServletRequest request){
-        try{
-            ActividadDTO response =service.insert(json);
-            if (response == null){
+    public ResponseEntity<?> createUsuario(@Valid @RequestBody ActividadDTO json) {
+        try {
+            ActividadDTO response = service.insert(json);
+            if (response == null) {
                 return ResponseEntity.badRequest().body(Map.of(
-                        "Error", "Inserción incorrecta",
-                        "Estatus", "Inserción incorrecta",
-                        "Descripción", "Verifique los valores"
+                        "error", "Inserción incorrecta"
                 ));
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "Estado", "Completado",
+                    "status", "Completado",
                     "data", response
             ));
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of(
-                            "status", "error",
-                            "message", "Error al registrar la actividad",
-                            "detail", e.getMessage()
-                    ));
+                    .body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
 

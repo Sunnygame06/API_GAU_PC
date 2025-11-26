@@ -1,9 +1,6 @@
 package com.example.demo.Models.DTO.Actividad;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,6 +9,7 @@ import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter @Setter
 public class ActividadDTO {
@@ -52,9 +50,7 @@ public class ActividadDTO {
     @Size(max = 100, message = "La Actividad Nombre solo puede tener como maximo 100 caracteres")
     private String actividad_nombre;
 
-    @NotBlank(message = "La tarea no puede ser nula")
-    @Size(max = 100, message = "La tarea solo puede tener como maximo 100 caracteres")
-    private String tarea;
+    private List<String> tareas;
 
     @Min(value = 0, message = "La cantidad debe ser mayor que 0")
     private Long hombres;

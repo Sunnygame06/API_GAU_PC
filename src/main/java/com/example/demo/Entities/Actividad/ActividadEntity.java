@@ -1,5 +1,6 @@
 package com.example.demo.Entities.Actividad;
 
+import com.example.demo.Entities.Usuario.UsuarioEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -64,6 +65,8 @@ public class ActividadEntity {
     @Column(name = "RESPALDO")
     private String respaldo;
 
-    @Column(name = "ID_USUARIO")
-    private Long Id_Usuario;
+    // 🔥 RELACIÓN CORRECTA
+    @ManyToOne
+    @JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID_USUARIO")
+    private UsuarioEntity usuario;
 }

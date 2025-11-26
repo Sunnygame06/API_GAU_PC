@@ -1,10 +1,12 @@
 package com.example.demo.Service.Actividad;
 
 import com.example.demo.Entities.Actividad.ActividadEntity;
+import com.example.demo.Entities.Usuario.UsuarioEntity;
 import com.example.demo.Exceptions.DatoDuplicado.ExceptionDatoDuplicado;
 import com.example.demo.Exceptions.DatoNoEncontrado.ExceptionDatoNoEncontrado;
 import com.example.demo.Models.DTO.Actividad.ActividadDTO;
 import com.example.demo.Repository.Actividad.ActividadRepository;
+import com.example.demo.Repository.Usuario.UsuarioRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -24,8 +27,11 @@ public class ActividadService {
     @Autowired
     private ActividadRepository repo;
 
+    @Autowired
+    private UsuarioRepository usuarioRepo;
+
     // ============================
-    // 🔹 LISTAR CON PAGINACIÓN
+    // LISTAR
     // ============================
     public Page<ActividadDTO> getAllActividades(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -34,26 +40,30 @@ public class ActividadService {
     }
 
     // ============================
-    // 🔹 INSERTAR NUEVO SOLICITANTE
+    // INSERTAR
     // ============================
     public ActividadDTO insert(@Valid ActividadDTO json) {
         if (json == null) {
-            throw new IllegalArgumentException("La información de la actividad no puede ser nula");
+            throw new IllegalArgumentException("Datos nulos");
         }
+
         try {
             ActividadEntity entity = convertirAEntity(json);
+
             ActividadEntity guardado = repo.save(entity);
             return convertirADTO(guardado);
+
         } catch (Exception e) {
-            log.error("Error al registrar la actividad: " + e.getMessage());
-            throw new ExceptionDatoDuplicado("La actividad no pudo ser registrada");
+            log.error("Error al registrar actividad: {}", e.getMessage());
+            throw new ExceptionDatoDuplicado("No se pudo registrar la actividad.");
         }
     }
 
     // ============================
-    // 🔹 ACTUALIZAR SOLICITANTE
+    // ACTUALIZAR
     // ============================
     public ActividadDTO update(Long id, @Valid ActividadDTO json) {
+
         ActividadEntity existente = repo.findById(id)
                 .orElseThrow(() -> new ExceptionDatoNoEncontrado("Actividad no encontrada."));
 
@@ -63,26 +73,32 @@ public class ActividadService {
         existente.setRegion(json.getRegion());
         existente.setDepartamento(json.getDepartamento());
         existente.setMunicipio(json.getMunicipio());
-        existente.setH_Fin(json.getH_Fin());
+        existente.setDistrito(json.getDistrito());
         existente.setH_inicio(json.getH_inicio());
+        existente.setH_Fin(json.getH_Fin());
         existente.setHombres(json.getHombres());
         existente.setMujeres(json.getMujeres());
         existente.setObservaciones(json.getObservaciones());
         existente.setResultados(json.getResultados());
-        existente.setTarea(json.getTarea());
+        existente.setTarea(json.getTareas() == null ? "" : String.join(",", json.getTareas()));
         existente.setRespaldo(json.getRespaldo());
-        existente.setId_Usuario(json.getId_Usuario());
-        existente.setDistrito(json.getDistrito());
+
+        // 🔥 NUEVO: relacionar usuario
+        if (json.getId_Usuario() != null) {
+            UsuarioEntity usuario = usuarioRepo.findById(json.getId_Usuario())
+                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado."));
+            existente.setUsuario(usuario);
+        }
+
         ActividadEntity actualizado = repo.save(existente);
         return convertirADTO(actualizado);
     }
 
     // ============================
-    // 🔹 ELIMINAR SOLICITANTE
+    // ELIMINAR
     // ============================
     public boolean delete(Long id) {
-        ActividadEntity existencia = repo.findById(id).orElse(null);
-        if (existencia != null) {
+        if (repo.existsById(id)) {
             repo.deleteById(id);
             return true;
         }
@@ -90,49 +106,70 @@ public class ActividadService {
     }
 
     // ============================
-    // 🔹 CONVERTIDORES DTO ↔ ENTITY
+    // CONVERTIR ENTITY → DTO
     // ============================
-    private ActividadDTO convertirADTO(ActividadEntity objEntity) {
+    private ActividadDTO convertirADTO(ActividadEntity obj) {
         ActividadDTO dto = new ActividadDTO();
-        dto.setId(objEntity.getId());
-        dto.setActividad_nombre(objEntity.getActividad_nombre());
-        dto.setFecha(objEntity.getFecha());
-        dto.setEstado(objEntity.getEstado());
-        dto.setRegion(objEntity.getRegion());
-        dto.setDepartamento(objEntity.getDepartamento());
-        dto.setMunicipio(objEntity.getMunicipio());
-        dto.setH_Fin(objEntity.getH_Fin());
-        dto.setH_inicio(objEntity.getH_inicio());
-        dto.setHombres(objEntity.getHombres());
-        dto.setMujeres(objEntity.getMujeres());
-        dto.setObservaciones(objEntity.getObservaciones());
-        dto.setResultados(objEntity.getResultados());
-        dto.setTarea(objEntity.getTarea());
-        dto.setRespaldo(objEntity.getRespaldo());
-        dto.setId_Usuario(objEntity.getId_Usuario());
-        dto.setDistrito(objEntity.getDistrito());
+
+        dto.setId(obj.getId());
+        dto.setActividad_nombre(obj.getActividad_nombre());
+        dto.setFecha(obj.getFecha());
+        dto.setEstado(obj.getEstado());
+        dto.setRegion(obj.getRegion());
+        dto.setDepartamento(obj.getDepartamento());
+        dto.setMunicipio(obj.getMunicipio());
+        dto.setDistrito(obj.getDistrito());
+        dto.setH_inicio(obj.getH_inicio());
+        dto.setH_Fin(obj.getH_Fin());
+        dto.setHombres(obj.getHombres());
+        dto.setMujeres(obj.getMujeres());
+        dto.setObservaciones(obj.getObservaciones());
+        dto.setResultados(obj.getResultados());
+        dto.setTareas(
+                obj.getTarea() == null || obj.getTarea().isEmpty()
+                        ? List.of()
+                        : Arrays.asList(obj.getTarea().split(","))
+        );
+        dto.setRespaldo(obj.getRespaldo());
+
+        // 🔥 usuario
+        if (obj.getUsuario() != null) {
+            dto.setId_Usuario(obj.getUsuario().getId());
+        }
+
         return dto;
     }
 
+    // ============================
+    // CONVERTIR DTO → ENTITY
+    // ============================
     private ActividadEntity convertirAEntity(@Valid ActividadDTO json) {
-        ActividadEntity entity = new ActividadEntity();
-        entity.setId(json.getId());
-        entity.setActividad_nombre(json.getActividad_nombre());
-        entity.setFecha(json.getFecha());
-        entity.setEstado(json.getEstado());
-        entity.setRegion(json.getRegion());
-        entity.setDepartamento(json.getDepartamento());
-        entity.setMunicipio(json.getMunicipio());
-        entity.setH_Fin(json.getH_Fin());
-        entity.setH_inicio(json.getH_inicio());
-        entity.setHombres(json.getHombres());
-        entity.setMujeres(json.getMujeres());
-        entity.setObservaciones(json.getObservaciones());
-        entity.setResultados(json.getResultados());
-        entity.setTarea(json.getTarea());
-        entity.setRespaldo(json.getRespaldo());
-        entity.setId_Usuario(json.getId_Usuario());
-        entity.setDistrito(json.getDistrito());
-        return entity;
+
+        ActividadEntity e = new ActividadEntity();
+
+        e.setActividad_nombre(json.getActividad_nombre());
+        e.setFecha(json.getFecha());
+        e.setEstado(json.getEstado());
+        e.setRegion(json.getRegion());
+        e.setDepartamento(json.getDepartamento());
+        e.setMunicipio(json.getMunicipio());
+        e.setDistrito(json.getDistrito());
+        e.setH_inicio(json.getH_inicio());
+        e.setH_Fin(json.getH_Fin());
+        e.setHombres(json.getHombres());
+        e.setMujeres(json.getMujeres());
+        e.setObservaciones(json.getObservaciones());
+        e.setResultados(json.getResultados());
+        e.setRespaldo(json.getRespaldo());
+        e.setTarea(json.getTareas() == null ? "" : String.join(",", json.getTareas()));
+
+        // 🔥 asignar usuario
+        if (json.getId_Usuario() != null) {
+            UsuarioEntity usuario = usuarioRepo.findById(json.getId_Usuario())
+                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado."));
+            e.setUsuario(usuario);
+        }
+
+        return e;
     }
 }

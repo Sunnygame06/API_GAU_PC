@@ -1,10 +1,13 @@
 package com.example.demo.Entities.Usuario;
 
+import com.example.demo.Entities.Actividad.ActividadEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.List;
 
 @Entity
 @Table(name = "USUARIO")
@@ -48,4 +51,7 @@ public class UsuarioEntity {
 
     @Column(name = "FILTRAR")
     private String filtrar;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<ActividadEntity> actividades;
 }
