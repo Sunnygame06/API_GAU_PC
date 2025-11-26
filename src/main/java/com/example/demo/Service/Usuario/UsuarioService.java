@@ -12,18 +12,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Service
 @Slf4j
-@CrossOrigin
 public class UsuarioService {
 
     @Autowired
     private UsuarioRepository repo;
 
     // ============================
-    // 🔹 LISTAR CON PAGINACIÓN
+    // LISTAR CON PAGINACIÓN
     // ============================
     public Page<UsuarioDTO> getAllUsuarios(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -32,22 +30,25 @@ public class UsuarioService {
     }
 
     // ============================
-    // 🔹 OBTENER POR ID (NUEVO)
+    // OBTENER POR ID
     // ============================
     public UsuarioDTO getUsuarioById(Long id) {
         UsuarioEntity entity = repo.findById(id)
                 .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario con ID " + id + " no encontrado."));
-
         return convertirADTO(entity);
     }
 
     // ============================
-    // 🔹 INSERTAR NUEVO USUARIO
+    // INSERTAR NUEVO USUARIO (EMAIL + PASSWORD)
     // ============================
     public UsuarioDTO insert(@Valid UsuarioDTO json) {
         if (json == null) {
             throw new IllegalArgumentException("La información del usuario no puede ser nula");
         }
+        if (repo.existsByEmail(json.getEmail())) {
+            throw new ExceptionDatoDuplicado("El email ya está registrado");
+        }
+
         try {
             UsuarioEntity entity = convertirAEntity(json);
             UsuarioEntity guardado = repo.save(entity);
@@ -59,34 +60,37 @@ public class UsuarioService {
     }
 
     // ============================
-    // 🔹 ACTUALIZAR USUARIO
+    // LOGIN
     // ============================
-    public UsuarioDTO update(Long id, @Valid UsuarioDTO json) {
-        UsuarioEntity existente = repo.findById(id)
-                .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado."));
+    public UsuarioDTO login(String email, String password) {
+        UsuarioEntity usuario = repo.findByEmail(email)
+                .orElseThrow(() -> new ExceptionDatoNoEncontrado("Email no registrado"));
+        // ✨ Aquí va la verificación con hash si lo usas (Argon2, BCrypt, etc)
+        if (!password.equals(usuario.getPass())) {
+            throw new IllegalArgumentException("Contraseña incorrecta");
+        }
+        return convertirADTO(usuario);
+    }
 
-        existente.setNombre(json.getNombre());
-        existente.setTelefono(json.getTelefono());
-        existente.setRol(json.getRol());
-        existente.setEmail(json.getEmail());
-        existente.setUnidad(json.getUnidad());
-        existente.setPass(json.getPass());
-        existente.setRegion(json.getRegion());
-        existente.setDepartamento(json.getDepartamento());
-        existente.setMunicipio(json.getMunicipio());
-        existente.setDistrito(json.getDistrito());
-        existente.setFiltrar(json.getFiltrar());
+    // ============================
+    // ACTUALIZAR USUARIO
+    // ============================
+    public UsuarioDTO update(Long id, @Valid UsuarioDTO usuario) {
+        UsuarioEntity existente = repo.findById(id)
+                .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado"));
+
+        existente.setEmail(usuario.getEmail());
+        existente.setPass(usuario.getPassword());
 
         UsuarioEntity actualizado = repo.save(existente);
         return convertirADTO(actualizado);
     }
 
     // ============================
-    // 🔹 ELIMINAR USUARIO
+    // ELIMINAR USUARIO
     // ============================
     public boolean delete(Long id) {
-        UsuarioEntity existencia = repo.findById(id).orElse(null);
-        if (existencia != null) {
+        if (repo.existsById(id)) {
             repo.deleteById(id);
             return true;
         }
@@ -94,39 +98,21 @@ public class UsuarioService {
     }
 
     // ============================
-    // 🔹 CONVERTIDORES DTO ↔ ENTITY
+    // CONVERTIDORES DTO ↔ ENTITY
     // ============================
     private UsuarioDTO convertirADTO(UsuarioEntity objEntity) {
         UsuarioDTO dto = new UsuarioDTO();
         dto.setId(objEntity.getId());
-        dto.setNombre(objEntity.getNombre());
-        dto.setRol(objEntity.getRol());
-        dto.setTelefono(objEntity.getTelefono());
         dto.setEmail(objEntity.getEmail());
-        dto.setUnidad(objEntity.getUnidad());
-        dto.setPass(objEntity.getPass());
-        dto.setRegion(objEntity.getRegion());
-        dto.setDepartamento(objEntity.getDepartamento());
-        dto.setMunicipio(objEntity.getMunicipio());
-        dto.setDistrito(objEntity.getDistrito());
-        dto.setFiltrar(objEntity.getFiltrar());
+        dto.setPassword(objEntity.getPass());
         return dto;
     }
 
     private UsuarioEntity convertirAEntity(@Valid UsuarioDTO json) {
         UsuarioEntity entity = new UsuarioEntity();
         entity.setId(json.getId());
-        entity.setNombre(json.getNombre());
-        entity.setRol(json.getRol());
-        entity.setTelefono(json.getTelefono());
         entity.setEmail(json.getEmail());
-        entity.setUnidad(json.getUnidad());
-        entity.setPass(json.getPass());
-        entity.setRegion(json.getRegion());
-        entity.setDepartamento(json.getDepartamento());
-        entity.setMunicipio(json.getMunicipio());
-        entity.setDistrito(json.getDistrito());
-        entity.setFiltrar(json.getFiltrar());
+        entity.setPass(json.getPassword());
         return entity;
     }
 }

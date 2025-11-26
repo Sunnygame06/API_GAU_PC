@@ -1,9 +1,9 @@
-package com.example.demo.Controller.Usuario;
+package com.example.demo.Controller.Empleado;
 
 import com.example.demo.Exceptions.DatoDuplicado.ExceptionDatoDuplicado;
 import com.example.demo.Exceptions.DatoNoEncontrado.ExceptionDatoNoEncontrado;
-import com.example.demo.Models.DTO.Usuario.UsuarioDTO;
-import com.example.demo.Service.Usuario.UsuarioService;
+import com.example.demo.Models.DTO.Empleado.EmpleadoDTO;
+import com.example.demo.Service.Empleado.EmpleadoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,15 +15,15 @@ import java.time.Instant;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/apiUsuario")
-public class UsuarioController {
+@RequestMapping("/apiEmpleado")
+public class EmpleadoController {
 
     @Autowired
-    private UsuarioService service;
+    private EmpleadoService service;
 
-    // 🔹 GET ALL USUARIOS
-    @GetMapping("/getAllUsuarios")
-    public ResponseEntity<?> getAllUsuarios(
+    // 🔹 GET ALL EMPLEADOS
+    @GetMapping("/getAllEmpleados")
+    public ResponseEntity<?> getAllEmpleados(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -33,35 +33,35 @@ public class UsuarioController {
             ));
         }
 
-        Page<UsuarioDTO> usuarios = service.getAllUsuarios(page, size);
+        Page<EmpleadoDTO> empleados = service.getAllEmpleados(page, size);
 
-        if (usuarios == null || usuarios.isEmpty()) {
+        if (empleados == null || empleados.isEmpty()) {
             return ResponseEntity.ok(Map.of(
                     "content", new Object[]{},
                     "empty", true
             ));
         }
 
-        return ResponseEntity.ok(usuarios);
+        return ResponseEntity.ok(empleados);
     }
 
-    // 🔹 GET USUARIO POR ID
-    @GetMapping("/getUsuario/{id}")
-    public ResponseEntity<?> getUsuarioById(@PathVariable Long id) {
+    // 🔹 GET EMPLEADO POR ID
+    @GetMapping("/getEmpleado/{id}")
+    public ResponseEntity<?> getEmpleadoById(@PathVariable Long id) {
         try {
-            UsuarioDTO usuario = service.getUsuarioById(id);
-            return ResponseEntity.ok(usuario);
+            EmpleadoDTO empleado = service.getEmpleadoById(id);
+            return ResponseEntity.ok(empleado);
         } catch (ExceptionDatoNoEncontrado e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Usuario no encontrado"));
+                    .body(Map.of("error", "Empleado no encontrado"));
         }
     }
 
-    // 🔹 CREAR USUARIO
-    @PostMapping("/newUsuario")
-    public ResponseEntity<?> createUsuario(@Valid @RequestBody UsuarioDTO json) {
+    // 🔹 CREAR EMPLEADO
+    @PostMapping("/newEmpleado")
+    public ResponseEntity<?> createEmpleado(@Valid @RequestBody EmpleadoDTO json) {
         try {
-            UsuarioDTO response = service.insert(json);
+            EmpleadoDTO response = service.insert(json);
             if (response == null) {
                 return ResponseEntity.badRequest().body(Map.of(
                         "error", "Inserción incorrecta"
@@ -77,14 +77,14 @@ public class UsuarioController {
         }
     }
 
-    // 🔹 ACTUALIZAR USUARIO
-    @PutMapping("/updateUsuario/{id}")
-    public ResponseEntity<?> updateUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuario) {
+    // 🔹 ACTUALIZAR EMPLEADO
+    @PutMapping("/updateEmpleado/{id}")
+    public ResponseEntity<?> updateEmpleado(@PathVariable Long id, @Valid @RequestBody EmpleadoDTO empleado) {
         try {
-            UsuarioDTO usuarioActualizado = service.update(id, usuario);
-            return ResponseEntity.ok(usuarioActualizado);
+            EmpleadoDTO empleadoActualizado = service.update(id, empleado);
+            return ResponseEntity.ok(empleadoActualizado);
         } catch (ExceptionDatoNoEncontrado e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Usuario no encontrado"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Empleado no encontrado"));
         } catch (ExceptionDatoDuplicado e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
                     "error", "Datos duplicados",
@@ -93,19 +93,19 @@ public class UsuarioController {
         }
     }
 
-    // 🔹 ELIMINAR USUARIO
-    @DeleteMapping("/deleteUsuario/{id}")
-    public ResponseEntity<?> deleteUsuario(@PathVariable Long id) {
+    // 🔹 ELIMINAR EMPLEADO
+    @DeleteMapping("/deleteEmpleado/{id}")
+    public ResponseEntity<?> deleteEmpleado(@PathVariable Long id) {
         try {
             if (!service.delete(id)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                        "error", "Usuario no encontrado",
+                        "error", "Empleado no encontrado",
                         "timestamp", Instant.now().toString()
                 ));
             }
             return ResponseEntity.ok(Map.of(
                     "status", "Completado",
-                    "message", "Usuario eliminado correctamente"
+                    "message", "Empleado eliminado correctamente"
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(

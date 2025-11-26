@@ -3,71 +3,69 @@ package com.example.demo.Models.DTO.Actividad;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.text.DateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 public class ActividadDTO {
 
     private Long id;
 
     @NotBlank(message = "El estado no puede ser nulo")
-    @Size(max = 100, message = "El estado solo puede tener como maximo 100 caracteres")
+    @Size(max = 100, message = "El estado solo puede tener como máximo 100 caracteres")
     private String estado;
 
+    @NotNull(message = "La fecha no puede ser nula")
     private LocalDate fecha;
 
-    @NotBlank(message = "La hora inicio no puede ser nulo")
-    @Size(max = 10, message = "La hora inicio solo puede tener como maximo 10 caracteres")
-    private String H_inicio;
+    @NotBlank(message = "La hora de inicio no puede ser nula")
+    @Size(max = 10, message = "La hora de inicio solo puede tener como máximo 10 caracteres")
+    private String horaInicio;
 
-    @NotBlank(message = "La hora fin no puede ser nulo")
-    @Size(max = 10, message = "La hora fin solo puede tener como maximo 10 caracteres")
-    private String H_Fin;
+    @NotBlank(message = "La hora de fin no puede ser nula")
+    @Size(max = 10, message = "La hora de fin solo puede tener como máximo 10 caracteres")
+    private String horaFin;
 
-    @NotBlank(message = "La region no puede ser nulo")
-    @Size(max = 100, message = "La region solo puede tener como maximo 100 caracteres")
+    @NotBlank(message = "La región no puede ser nula")
+    @Size(max = 100, message = "La región solo puede tener como máximo 100 caracteres")
     private String region;
 
     @NotBlank(message = "El departamento no puede ser nulo")
-    @Size(max = 100, message = "El departamento solo puede tener como maximo 100 caracteres")
+    @Size(max = 100, message = "El departamento solo puede tener como máximo 100 caracteres")
     private String departamento;
 
     @NotBlank(message = "El municipio no puede ser nulo")
-    @Size(max = 100, message = "El municipio solo puede tener como maximo 100 caracteres")
+    @Size(max = 100, message = "El municipio solo puede tener como máximo 100 caracteres")
     private String municipio;
 
     @NotBlank(message = "El distrito no puede ser nulo")
-    @Size(max = 100, message = "El distrito solo puede tener como maximo 100 caracteres")
+    @Size(max = 100, message = "El distrito solo puede tener como máximo 100 caracteres")
     private String distrito;
 
-    @NotBlank(message = "La Actividad Nombre no puede ser nula")
-    @Size(max = 100, message = "La Actividad Nombre solo puede tener como maximo 100 caracteres")
-    private String actividad_nombre;
+    @NotBlank(message = "El nombre de la actividad no puede ser nulo")
+    @Size(max = 500, message = "El nombre de la actividad solo puede tener como máximo 500 caracteres")
+    private String nombreActividad;
 
     private List<String> tareas;
 
-    @Min(value = 0, message = "La cantidad debe ser mayor que 0")
-    private Long hombres;
+    @Min(value = 0, message = "La cantidad de hombres debe ser mayor o igual a 0")
+    private Long hombres = 0L;
 
-    @Min(value = 0, message = "La cantidad debe ser mayor que 0")
-    private Long mujeres;
+    @Min(value = 0, message = "La cantidad de mujeres debe ser mayor o igual a 0")
+    private Long mujeres = 0L;
 
-    @NotBlank(message = "El resultado no puede ser nulo")
-    @Size(max = 100, message = "El resultado solo puede tener como maximo 1000 caracteres")
+    @NotBlank(message = "Los resultados no pueden ser nulos")
+    @Size(max = 1000, message = "Los resultados solo pueden tener como máximo 1000 caracteres")
     private String resultados;
 
-    @NotBlank(message = "La observacion no puede ser nula")
-    @Size(max = 100, message = "La observacion solo puede tener como maximo 1000 caracteres")
+    @NotBlank(message = "Las observaciones no pueden ser nulas")
+    @Size(max = 1000, message = "Las observaciones solo pueden tener como máximo 1000 caracteres")
     private String observaciones;
 
-    @Size(max = 100, message = "El respaldo solo puede tener como maximo 500 caracteres")
+    @Size(max = 500, message = "El respaldo solo puede tener como máximo 500 caracteres")
     private String respaldo;
 
-    private Long Id_Usuario;
+    private Long idEmpleado; // Relación con empleado
 }

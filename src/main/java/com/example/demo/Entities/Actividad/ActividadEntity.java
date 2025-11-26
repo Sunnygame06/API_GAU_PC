@@ -1,6 +1,6 @@
 package com.example.demo.Entities.Actividad;
 
-import com.example.demo.Entities.Usuario.UsuarioEntity;
+import com.example.demo.Entities.Empleado.EmpleadoEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -8,11 +8,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "ACTIVIDAD")
-@Getter @Setter @ToString @EqualsAndHashCode
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class ActividadEntity {
 
     @Id
@@ -23,50 +25,50 @@ public class ActividadEntity {
     @Column(name = "ESTADO")
     private String estado;
 
-    @Column(name = "FECHA")
+    @Column(name = "FECHA", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "HORA_INICIO")
-    private String H_inicio;
+    @Column(name = "HORA_INICIO", length = 10)
+    private String horaInicio;
 
-    @Column(name = "HORA_FIN")
-    private String H_Fin;
+    @Column(name = "HORA_FIN", length = 10)
+    private String horaFin;
 
-    @Column(name = "REGION")
+    @Column(name = "REGION", length = 100)
     private String region;
 
-    @Column(name = "DEPARTAMENTO")
+    @Column(name = "DEPARTAMENTO", length = 100)
     private String departamento;
 
-    @Column(name = "MUNICIPIO")
+    @Column(name = "MUNICIPIO", length = 100)
     private String municipio;
 
-    @Column(name = "DISTRITO")
+    @Column(name = "DISTRITO", length = 100)
     private String distrito;
 
-    @Column(name = "ACTIVIDAD_NOMBRE")
-    private String actividad_nombre;
+    @Column(name = "ACTIVIDAD_NOMBRE", length = 500)
+    private String nombreActividad;
 
-    @Column(name = "TAREA")
+    @Column(name = "TAREA", length = 300)
     private String tarea;
 
     @Column(name = "HOMBRES")
-    private Long hombres;
+    private Long hombres = 0L;
 
     @Column(name = "MUJERES")
-    private Long mujeres;
+    private Long mujeres = 0L;
 
-    @Column(name = "RESULTADOS")
+    @Column(name = "RESULTADOS", length = 1000)
     private String resultados;
 
-    @Column(name = "OBSERVACIONES")
+    @Column(name = "OBSERVACIONES", length = 1000)
     private String observaciones;
 
-    @Column(name = "RESPALDO")
+    @Column(name = "RESPALDO", length = 500)
     private String respaldo;
 
-    // 🔥 RELACIÓN CORRECTA
-    @ManyToOne
-    @JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID_USUARIO")
-    private UsuarioEntity usuario;
+    // 🔥 RELACIÓN CON EMPLEADO
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_EMPLEADO", nullable = false)
+    private EmpleadoEntity empleado;
 }

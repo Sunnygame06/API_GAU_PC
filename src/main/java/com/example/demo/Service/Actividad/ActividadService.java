@@ -1,12 +1,13 @@
 package com.example.demo.Service.Actividad;
 
 import com.example.demo.Entities.Actividad.ActividadEntity;
+import com.example.demo.Entities.Empleado.EmpleadoEntity;
 import com.example.demo.Entities.Usuario.UsuarioEntity;
 import com.example.demo.Exceptions.DatoDuplicado.ExceptionDatoDuplicado;
 import com.example.demo.Exceptions.DatoNoEncontrado.ExceptionDatoNoEncontrado;
 import com.example.demo.Models.DTO.Actividad.ActividadDTO;
 import com.example.demo.Repository.Actividad.ActividadRepository;
-import com.example.demo.Repository.Usuario.UsuarioRepository;
+import com.example.demo.Repository.Empleado.EmpleadoRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,21 +15,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Service
 @Slf4j
-@CrossOrigin
 public class ActividadService {
 
     @Autowired
     private ActividadRepository repo;
 
     @Autowired
-    private UsuarioRepository usuarioRepo;
+    private EmpleadoRepository empleadoRepo;
 
     // ============================
     // LISTAR
@@ -49,10 +48,8 @@ public class ActividadService {
 
         try {
             ActividadEntity entity = convertirAEntity(json);
-
             ActividadEntity guardado = repo.save(entity);
             return convertirADTO(guardado);
-
         } catch (Exception e) {
             log.error("Error al registrar actividad: {}", e.getMessage());
             throw new ExceptionDatoDuplicado("No se pudo registrar la actividad.");
@@ -67,15 +64,15 @@ public class ActividadService {
         ActividadEntity existente = repo.findById(id)
                 .orElseThrow(() -> new ExceptionDatoNoEncontrado("Actividad no encontrada."));
 
-        existente.setActividad_nombre(json.getActividad_nombre());
+        existente.setNombreActividad(json.getNombreActividad());
         existente.setFecha(json.getFecha());
         existente.setEstado(json.getEstado());
         existente.setRegion(json.getRegion());
         existente.setDepartamento(json.getDepartamento());
         existente.setMunicipio(json.getMunicipio());
         existente.setDistrito(json.getDistrito());
-        existente.setH_inicio(json.getH_inicio());
-        existente.setH_Fin(json.getH_Fin());
+        existente.setHoraInicio(json.getHoraInicio());
+        existente.setHoraFin(json.getHoraFin());
         existente.setHombres(json.getHombres());
         existente.setMujeres(json.getMujeres());
         existente.setObservaciones(json.getObservaciones());
@@ -83,11 +80,11 @@ public class ActividadService {
         existente.setTarea(json.getTareas() == null ? "" : String.join(",", json.getTareas()));
         existente.setRespaldo(json.getRespaldo());
 
-        // 🔥 NUEVO: relacionar usuario
-        if (json.getId_Usuario() != null) {
-            UsuarioEntity usuario = usuarioRepo.findById(json.getId_Usuario())
-                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado."));
-            existente.setUsuario(usuario);
+        // 🔥 relacionar empleado
+        if (json.getIdEmpleado() != null) {
+            EmpleadoEntity empleado = empleadoRepo.findById(json.getIdEmpleado())
+                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Empleado no encontrado."));
+            existente.setEmpleado(empleado);
         }
 
         ActividadEntity actualizado = repo.save(existente);
@@ -112,15 +109,15 @@ public class ActividadService {
         ActividadDTO dto = new ActividadDTO();
 
         dto.setId(obj.getId());
-        dto.setActividad_nombre(obj.getActividad_nombre());
+        dto.setNombreActividad(obj.getNombreActividad());
         dto.setFecha(obj.getFecha());
         dto.setEstado(obj.getEstado());
         dto.setRegion(obj.getRegion());
         dto.setDepartamento(obj.getDepartamento());
         dto.setMunicipio(obj.getMunicipio());
         dto.setDistrito(obj.getDistrito());
-        dto.setH_inicio(obj.getH_inicio());
-        dto.setH_Fin(obj.getH_Fin());
+        dto.setHoraInicio(obj.getHoraInicio());
+        dto.setHoraFin(obj.getHoraFin());
         dto.setHombres(obj.getHombres());
         dto.setMujeres(obj.getMujeres());
         dto.setObservaciones(obj.getObservaciones());
@@ -132,9 +129,9 @@ public class ActividadService {
         );
         dto.setRespaldo(obj.getRespaldo());
 
-        // 🔥 usuario
-        if (obj.getUsuario() != null) {
-            dto.setId_Usuario(obj.getUsuario().getId());
+        // 🔥 empleado
+        if (obj.getEmpleado() != null) {
+            dto.setIdEmpleado(obj.getEmpleado().getIdEmpleado());
         }
 
         return dto;
@@ -147,15 +144,15 @@ public class ActividadService {
 
         ActividadEntity e = new ActividadEntity();
 
-        e.setActividad_nombre(json.getActividad_nombre());
+        e.setNombreActividad(json.getNombreActividad());
         e.setFecha(json.getFecha());
         e.setEstado(json.getEstado());
         e.setRegion(json.getRegion());
         e.setDepartamento(json.getDepartamento());
         e.setMunicipio(json.getMunicipio());
         e.setDistrito(json.getDistrito());
-        e.setH_inicio(json.getH_inicio());
-        e.setH_Fin(json.getH_Fin());
+        e.setHoraInicio(json.getHoraInicio());
+        e.setHoraFin(json.getHoraFin());
         e.setHombres(json.getHombres());
         e.setMujeres(json.getMujeres());
         e.setObservaciones(json.getObservaciones());
@@ -163,11 +160,11 @@ public class ActividadService {
         e.setRespaldo(json.getRespaldo());
         e.setTarea(json.getTareas() == null ? "" : String.join(",", json.getTareas()));
 
-        // 🔥 asignar usuario
-        if (json.getId_Usuario() != null) {
-            UsuarioEntity usuario = usuarioRepo.findById(json.getId_Usuario())
-                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Usuario no encontrado."));
-            e.setUsuario(usuario);
+        // 🔥 asignar empleado
+        if (json.getIdEmpleado() != null) {
+            EmpleadoEntity empleado = empleadoRepo.findById(json.getIdEmpleado())
+                    .orElseThrow(() -> new ExceptionDatoNoEncontrado("Empleado no encontrado."));
+            e.setEmpleado(empleado);
         }
 
         return e;
