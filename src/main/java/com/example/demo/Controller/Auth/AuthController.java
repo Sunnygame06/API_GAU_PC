@@ -4,10 +4,8 @@ import com.example.demo.Models.DTO.Usuario.UsuarioDTO;
 import com.example.demo.Entities.Usuario.UsuarioEntity;
 import com.example.demo.Service.Auth.AuthService;
 import com.example.demo.Utils.JWTUtils;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -39,26 +37,13 @@ public class AuthController {
     @Value("${app.auth.ttlHours:8}")
     private int ttlHours;
 
-    // ============================================================
+    // ===========================
     // LOGIN
-    // ============================================================
-
-    @PostMapping(
-            value = "/login",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    // ===========================
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@Valid @RequestBody UsuarioDTO data) {
 
-        if (data.getEmail() == null || data.getEmail().isBlank()
-                || data.getPass() == null || data.getPass().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "status", "ERROR",
-                    "message", "Credenciales incompletas"
-            ));
-        }
-
-        Optional<UsuarioEntity> userOpt = authService.authenticate(data.getEmail(), data.getPass());
+        Optional<UsuarioEntity> userOpt = authService.authenticate(data.getEmail(), data.getPassword());
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).body(Map.of(
@@ -69,11 +54,8 @@ public class AuthController {
 
         UsuarioEntity user = userOpt.get();
 
-        // Crear JWT
-        String subject = user.getEmail();
-        String role = user.getRol();
-        String token = jwtUtils.generateToken(subject, role);
-
+        // Generar JWT
+        String token = jwtUtils.generateToken(user.getEmail(), user.getEmail());
         ResponseCookie cookie = buildJwtCookie(token);
 
         return ResponseEntity.ok()
@@ -83,53 +65,20 @@ public class AuthController {
                         "token", token,
                         "user", Map.of(
                                 "id", user.getId(),
-                                "nombre", user.getNombre(),
-                                "email", user.getEmail(),
-                                "rol", user.getRol(),
-                                "unidad", user.getUnidad()
+                                "email", user.getEmail()
                         )
                 ));
     }
 
-    // ============================================================
-    // LOGOUT
-    // ============================================================
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        ResponseCookie clear = clearJwtCookie();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, clear.toString())
-                .body(Map.of(
-                        "status", "OK",
-                        "message", "Sesión cerrada"
-                ));
-    }
-
-    // ============================================================
-    // REGISTRO
-    // ============================================================
-
-    @PostMapping(
-            value = "/register",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    // ===========================
+    // REGISTER
+    // ===========================
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> register(@Valid @RequestBody UsuarioDTO data) {
         try {
             UsuarioEntity nuevo = new UsuarioEntity();
-
-            nuevo.setNombre(data.getNombre());
-            nuevo.setTelefono(data.getTelefono());
             nuevo.setEmail(data.getEmail());
-            nuevo.setUnidad(data.getUnidad());
-            nuevo.setRol(data.getRol());
-            nuevo.setRegion(data.getRegion());
-            nuevo.setDepartamento(data.getDepartamento());
-            nuevo.setMunicipio(data.getMunicipio());
-            nuevo.setDistrito(data.getDistrito());
-            nuevo.setPass(data.getPass()); // se encripta en AuthService
+            nuevo.setPass(data.getPassword()); // AuthService lo encripta
 
             UsuarioEntity guardado = authService.register(nuevo);
 
@@ -138,12 +87,9 @@ public class AuthController {
                     "message", "Usuario registrado",
                     "user", Map.of(
                             "id", guardado.getId(),
-                            "nombre", guardado.getNombre(),
-                            "email", guardado.getEmail(),
-                            "rol", guardado.getRol()
+                            "email", guardado.getEmail()
                     )
             ));
-
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "ERROR",
@@ -152,32 +98,9 @@ public class AuthController {
         }
     }
 
-    // ============================================================
-    // ME (Usuario autenticado)
-    // ============================================================
-
-    @GetMapping("/me")
-    public ResponseEntity<?> me(org.springframework.security.core.Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of(
-                    "status", "ERROR",
-                    "message", "No autenticado"
-            ));
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "status", "OK",
-                "user", Map.of(
-                        "username", auth.getName(),
-                        "roles", auth.getAuthorities().stream().map(a -> a.getAuthority()).toList()
-                )
-        ));
-    }
-
-    // ============================================================
+    // ===========================
     // HELPERS COOKIE
-    // ============================================================
-
+    // ===========================
     private ResponseCookie buildJwtCookie(String token) {
         ResponseCookie.ResponseCookieBuilder b = ResponseCookie
                 .from(jwtCookieName, token)
